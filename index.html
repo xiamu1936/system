@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#173f35"><title>邻里家电 · 门店工作台</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/mobile.css"><script src="/app.js" defer></script></head>
+<body data-page="overview">
+<aside class="sidebar">
+  <a class="brand" href="/">邻<span>里</span><small>家电门店工作台</small></a>
+  <div class="store-label">单店 · 仓库与展厅</div>
+  <nav aria-label="主菜单">
+    <button data-page="overview" class="active" aria-current="page"><b aria-hidden="true">◫</b> 经营概览</button>
+    <button data-page="checkout"><b>＋</b> 开单收银</button>
+    <button data-page="inventory"><b>▤</b> 商品与库存</button>
+    <button data-page="orders"><b>≡</b> 订单与交付</button>
+    <button data-page="ledger"><b>↔</b> 收支与流水</button>
+  </nav>
+  <div class="side-bottom"><span class="dot"></span> 本机数据保存<br><small>实际扣款由门店现有收款方式完成</small><a href="/api/backup" download>下载数据库备份 ↗</a></div>
+</aside>
+<div class="main-shell">
+  <header class="topbar"><span>门店管理 / <b id="breadcrumb">经营概览</b></span><div><span id="keyboard-scan-status" aria-live="polite">键盘扫码已开启</span><span id="sync-time">正在连接…</span><button id="refresh" class="quiet">刷新数据 ↻</button></div></header>
+  <main>
+    <div class="notice" id="data-notice">正在读取本机账本…</div>
+    <div class="page-heading"><div><span class="eyebrow">STORE WORKSPACE</span><h1 id="page-title">看清生意，做好每一单。</h1><p id="page-subtitle">库存、交付和收款，各有一本清楚的账。</p></div><button id="heading-action" class="primary">开一笔新单 ↗</button></div>
+    <section id="overview" class="page"></section>
+    <section id="checkout" class="page" hidden>
+      <button type="button" id="mobile-cart-jump" class="mobile-only checkout-shortcut" disabled><span id="mobile-cart-label">尚未选择商品</span><span>填写与收款 ↓</span></button>
+      <div class="checkout-grid"><div class="panel"><div class="panel-head"><h2>选商品</h2><span>扫码输入编码后按回车</span></div><input id="sale-search" type="search" placeholder="搜索名称、品牌、型号或条码" aria-label="搜索销售商品"><div id="sale-catalog" class="catalog"></div></div>
+      <div class="panel cart-panel"><div class="panel-head"><h2>本次销售</h2><button id="clear-cart" class="quiet">清空</button></div><div id="cart"></div>
+        <form id="sale-form">
+          <div class="form-grid"><label>交付安排<select name="fulfillment" id="fulfillment"><option>立即提货</option><option>稍后送货</option></select></label><label>收款方式<select name="method"><option>微信</option><option>现金</option><option>支付宝</option><option>银行卡</option></select></label></div>
+          <div class="form-grid"><label>客户名称<input name="customer" maxlength="80" placeholder="欠款／送货时必填"></label><label>客户电话<input name="phone" maxlength="40" type="tel" placeholder="欠款／送货时必填"></label></div>
+          <div class="form-grid"><label>备用电话<input name="backup_phone" maxlength="40" type="tel"></label><label>客户来源<select name="source"><option>到店</option><option>抖音</option><option>熟人推荐</option><option>其他</option></select></label></div>
+          <label>送货地址／提货安排<input name="address" maxlength="200" placeholder="稍后送货时必填"></label><label>备注<input name="note" maxlength="500" placeholder="安装安排、赠品说明等"></label>
+          <label id="schedule-label" hidden>预约送装时间<input name="scheduled_at" type="datetime-local"></label>
+          <label class="check"><input name="display_disclosed" type="checkbox"> 如涉及展示机，已提前告知客户</label>
+          <div class="cart-total"><span>订单应收</span><strong id="cart-total">¥0.00</strong></div>
+          <label>本次已收（元）<div class="input-action"><input name="paid" id="sale-paid" type="number" min="0" step="0.01" value="0" required><button type="button" id="pay-full" class="quiet">填入全款</button></div></label>
+          <p class="muted" id="sale-balance">未收部分将记为客户欠款。</p><button type="submit" class="primary full">确认开单并登记收款</button>
+        </form>
+      </div></div>
+    </section>
+    <section id="inventory" class="page" hidden><div class="panel scan-panel"><div class="panel-head"><div><h2>扫码入库</h2><p>在页面空白处直接用键盘输入型号条码，再按回车即可模拟扫码。填写资料时不会拦截正常输入。</p></div><button id="category-settings" class="quiet">品类安装费设置</button></div><form id="inbound-scan" class="filters"><input id="receive-code" required placeholder="也可在这里输入入库商品条码，再按回车" aria-label="入库扫码条码" autocomplete="off"><button class="primary">识别并入库</button></form></div><div class="panel"><div class="panel-head"><div><h2>商品库存</h2><p>可售 = 仓库 + 展厅 − 已预留；预留按型号，装车时才扣库存。</p></div><button id="new-product" class="primary">＋ 新建商品</button></div><div class="filters"><input id="inventory-search" type="search" placeholder="搜索商品名称、品牌或编码" aria-label="搜索库存"><label class="check"><input id="low-only" type="checkbox"> 仅看库存预警</label></div><div id="inventory-table" class="table-wrap"></div></div></section>
+    <section id="orders" class="page" hidden><div class="panel"><div class="panel-head"><div><h2>订单与交付</h2><p>定金留货 → 装车扫码 → 送装完成 → 尾款与安装费结清。</p></div><a href="/api/orders.csv" class="button" download>导出订单 CSV</a></div><div class="filters"><input id="order-search" type="search" placeholder="订单号、客户或电话" aria-label="搜索订单"><select id="order-filter" aria-label="筛选订单"><option value="all">全部订单</option><option value="pending">待出库</option><option value="owed">有欠款</option><option value="delivered">已出库</option><option value="complete">已完成</option></select></div><div id="orders-table" class="table-wrap"></div></div></section>
+    <section id="ledger" class="page" hidden></section>
+    <div class="mobile-only mobile-tools"><a class="button" href="/api/backup" download>下载账本备份</a><span>当前数据保存在服务端账本</span></div>
+    <footer>邻里家电 · 本地试用版 <span>以每一次真实业务操作，完善门店流程。</span></footer>
+  </main>
+</div>
+<dialog id="dialog"><div class="dialog-head"><h2 id="dialog-title"></h2><button id="close-dialog" class="quiet" aria-label="关闭">✕</button></div><p id="dialog-notice" class="alert no-print" role="alert" hidden></p><div id="dialog-body"></div></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+</body></html>
